@@ -1,0 +1,195 @@
+/* Global */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #222831;
+  color: #eeeeee;
+}
+
+/* Root container */
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Chat area */
+.chat-container {
+  width: 100%;
+  max-width: 720px;
+  flex: 1;               
+  margin-top: 32px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+/* Messages */
+.message-user {
+  text-align: right;
+  margin: 12px 0;
+}
+
+.message-user span {
+  background: #948979;
+  color: #222831;
+  padding: 10px 14px;
+  border-radius: 16px;
+  display: inline-block;
+  max-width: 70%;
+}
+
+.message-ai {
+  margin: 12px 0;
+  color: #dcdcdc;
+  max-width: 70%;
+}
+
+/* Place cards wrapper */
+.places-wrapper {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Place card */
+.place-card {
+  background: #393e46;
+  padding: 14px;
+  border-radius: 14px;
+}
+
+/* Input section wrapper */
+.input-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #393e46;
+  padding: 16px 0;
+}
+
+/* Input bar */
+.input-bar {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.input-bar input {
+  flex: 1;
+  padding: 12px;
+  background: #393e46;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  outline: none;
+}
+
+.input-bar button {
+  background: #948979;
+  color: #222831;
+  border: none;
+  padding: 0 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.input-bar button:hover {
+  opacity: 0.9;
+}
+
+.message-ai {
+  margin: 12px 0;
+  max-width: 70%;
+}
+
+.message-ai span {
+  background: #393e46;
+  color: #eeeeee;
+  padding: 10px 14px;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+/* Navbar */
+.navbar {
+  width: 100%;
+  height: 56px;
+  background: #393e46;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  box-sizing: border-box;
+}
+
+/* App name on left */
+.nav-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #eeeeee;
+}
+
+/* Menu wrapper on right */
+.nav-menu {
+  position: relative;
+}
+
+/* Hamburger button */
+.menu-btn {
+  background: #393e46;          /* same as navbar */
+  border: none;
+  font-size: 22px;
+  color: #eeeeee;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.menu-btn:hover {
+  background: #222831;
+}
+
+/* Dropdown container (ChatGPT-style) */
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  background: #393e46;
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 180px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  z-index: 100;
+}
+
+/* Menu items */
+.dropdown-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #eeeeee;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Hover effect */
+.dropdown-item:hover {
+  background: #222831;
+}
+
+/* Logout (danger action) */
+.dropdown-item.danger {
+  color: #ffb4b4;
+}
+
+.dropdown-item.danger:hover {
+  background: #2a1f1f;
+}
