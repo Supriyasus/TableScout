@@ -1,63 +1,43 @@
-# This agent takes enriched places (distance, traffic, crowd, rating, budget match, mood match) and computes a final score so places can be ranked.
-# app/agents/scoring_agent.py
-
 from typing import Dict, List
+from schemas.user_intent import UserIntent
 
 
 class ScoringAgent:
     """
-    ScoringAgent computes a final score for each place
-    using multiple normalized factors.
+    Scores places using intent-driven weights.
     """
 
-    def score_place(self, place: Dict) -> float:
-        """
-        Computes a score between 0 and 1 for a single place.
-        """
-
+    def score_place(self, place: Dict, intent: UserIntent) -> float:
         score = 0.0
+        prefs = intent.preferences
 
-        # ---- Rating (0–5 → 0–1) ----
+        # Rating
         rating = place.get("rating")
-        if rating is not None:
-            score += (rating / 5.0) * 0.30
+        if rating:
+            score += (rating / 5.0) * prefs.get("food_quality", 0.5) * 0.4
 
-        # ---- Travel time (lower is better) ----
-        travel_time = place.get("travel_time")  # minutes
-        if travel_time is not None:
-            # assume 30 min is worst acceptable
+        # Travel
+        travel_time = place.get("travel_time")
+        if travel_time:
             travel_score = max(0, 1 - (travel_time / 30))
-            score += travel_score * 0.30
+            score += travel_score * (1 - prefs.get("travel_tolerance", 0.5)) * 0.3
 
-        # ---- Crowd level ----
+        # Crowd
         crowd = place.get("crowd_level")
         if crowd == "low":
-            score += 0.15
+            score += prefs.get("crowd_quietness", 0.5) * 0.2
         elif crowd == "medium":
-            score += 0.08
-        elif crowd == "high":
-            score += 0.02
+            score += 0.1
 
-        # ---- Budget match ----
-        if place.get("budget_match"):
-            score += 0.15
+        return round(min(score, 1.0), 2)
 
-        # ---- Mood match ----
-        if place.get("mood_match"):
-            score += 0.10
-
-        return round(score, 2)
-
-    def rank_places(self, places: List[Dict]) -> List[Dict]:
-        """
-        Adds scores to places and returns them sorted by score.
-        """
+    def rank_places(
+        self,
+        places: List[Dict],
+        intent: UserIntent
+    ) -> List[Dict]:
 
         for place in places:
-            place["final_score"] = self.score_place(place)
+            place["final_score"] = self.score_place(place, intent)
 
-        return sorted(
-            places,
-            key=lambda x: x["final_score"],
-            reverse=True
-        )
+        return sorted(places, key=lambda x: x["final_score"], reverse=True)

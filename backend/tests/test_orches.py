@@ -1,8 +1,8 @@
 # from app.mcp_servers.maps import MapboxMCP
 
 # from ..agents.orchestrator import OrchestratorAgent
-from ..agents.orchestrator import OrchestratorAgent
-from ..api.v1.places import PlaceRequest
+from agents.orchestrator import OrchestratorAgent
+from api.v1.places import PlaceRequest
 
 # from ..mcp_servers.maps_mcp import MapboxMCP
 

@@ -1,4 +1,4 @@
-# from app.mcp_servers.maps import MapboxMCP
+'''# from app.mcp_servers.maps import MapboxMCP
 
 from ..mcp_servers.maps_mcp import MapboxMCP
 
@@ -24,6 +24,39 @@ for p in places:
 
 if places:
     # print("\n🚗 Getting travel time...")
+    time_data = mcp.get_travel_time(
+        origin_lat=lat,
+        origin_lng=lng,
+        dest_lat=places[0]["latitude"],
+        dest_lng=places[0]["longitude"]
+    )
+    print(time_data)
+'''
+
+from mcp_servers.maps_mcp import MapboxMCP
+
+mcp = MapboxMCP()
+
+lat = 24.5785
+lng = 73.6825
+
+print("🔍 Searching nearby places...")
+
+categories = ["restaurant", "cafe", "hotel"]
+places = []
+
+for cat in categories:
+    places.extend(
+        mcp.search_places(lat, lng, cat, limit=5)
+    )
+
+print("Found:", len(places))
+
+for p in places:
+    print(p)
+
+if places:
+    print("\n🚗 Getting travel time...")
     time_data = mcp.get_travel_time(
         origin_lat=lat,
         origin_lng=lng,

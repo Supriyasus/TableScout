@@ -3,7 +3,3 @@ class BookingRequest(BaseModel):
     time: str
     people: int
     user_name: str
-
-
-
-# Currently these are hardcoded in routes for simplicity

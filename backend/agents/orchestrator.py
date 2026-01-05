@@ -1,88 +1,110 @@
-from typing import List, Dict
+from typing import Dict, List
 
+from agents.intent_extraction_agent import IntentExtractionAgent
+from mcp_servers.maps_mcp import MapboxMCP
 
-from ..mcp_servers.maps_mcp import MapboxMCP
-from ..agents.planner_agent import PlannerAgent
-from ..agents.traffic_agent import TrafficAgent
-from ..agents.popularity_agent import PopularityAgent
-from ..agents.scoring_agent import ScoringAgent
-from ..agents.explanation_agent import ExplanationAgent
+from agents.planner_agent import PlannerAgent
+from agents.traffic_agent import TrafficAgent
+from agents.popularity_agent import PopularityAgent
+from agents.scoring_agent import ScoringAgent
+from agents.explanation_agent import ExplanationAgent
 
 
 class OrchestratorAgent:
+    """
+    OrchestratorAgent coordinates all agents and MCPs
+    to produce final recommendations.
+    """
 
     def __init__(self):
+        self.intent_agent = IntentExtractionAgent()
         self.maps = MapboxMCP()
+
         self.planner = PlannerAgent()
         self.traffic = TrafficAgent()
         self.popularity = PopularityAgent()
         self.scoring = ScoringAgent()
         self.explainer = ExplanationAgent()
 
-    def get_recommendations(self, request) -> Dict:
+    def get_recommendations(
+        self,
+        user_query: str,
+        latitude: float,
+        longitude: float
+    ) -> Dict:
         """
-        Main AI pipeline controller
+        End-to-end recommendation pipeline
         """
 
-        # 1️⃣ Planner decides search strategy
+        # 1️⃣ Natural language → structured intent
+        intent = self.intent_agent.extract(user_query)
+
+        # 2️⃣ Planner decides search strategy
         plan = self.planner.create_plan(
-            mood=request.mood,
-            budget=request.budget,
-            time=request.time
+            intent=intent,
+            latitude=latitude,
+            longitude=longitude
         )
-        categories = plan["place_types"]
-        radius = plan["radius_km"]
 
-        lat = request.latitude
-        lng = request.longitude
+        all_places: List[Dict] = []
 
-        all_places = []
-
-        # 2️⃣ Fetch places for each category
-        for category in categories:
+        # 3️⃣ Fetch places via Maps MCP
+        for category in plan["place_types"]:
             places = self.maps.search_places(
-                lat=lat,
-                lng=lng,
+                lat=latitude,
+                lng=longitude,
                 category=category,
                 limit=10
             )
             all_places.extend(places)
 
-        enriched_places = []
+        enriched_places: List[Dict] = []
 
-        # 3️⃣ Enrich each result
+        # 4️⃣ Enrich each place
         for place in all_places:
 
+            # ---- Travel (raw) ----
             travel = self.maps.get_travel_time(
-                origin_lat=lat,
-                origin_lng=lng,
+                origin_lat=latitude,
+                origin_lng=longitude,
                 dest_lat=place["latitude"],
                 dest_lng=place["longitude"]
             )
 
-            popularity_score = self.popularity.estimate_crowd(
+            place["distance_km"] = travel["distance_km"]
+            place["travel_time"] = travel["travel_time"]
+
+            # ---- Traffic normalization ----
+            traffic = self.traffic.analyze_traffic(place)
+            place.update(traffic)
+
+            # ---- Popularity ----
+            pop = self.popularity.estimate_crowd(
                 place=place,
-                time_of_day=request.time
+                time_of_day=intent.time_of_day
             )
 
-            enriched_places.append({
-                **place,
-                "distance_km": travel["distance_km"],
-                "travel_time_min": travel["travel_time"],
-                "popularity_score": popularity_score
-            })
+            place["crowd_level"] = pop["crowd_level"]
+            place["crowd_confidence"] = pop["confidence"]
 
-        # 4️⃣ Score + Rank
-        ranked = self.scoring.rank_places(enriched_places)
+            enriched_places.append(place)
 
-        # 5️⃣ Add Explanation
-        explained = []
-        for p in ranked:
-            p["explanation"] = self.explainer.explain_choice(p)
-            explained.append(p)
+        # 5️⃣ Score + rank (intent-aware)
+        ranked_places = self.scoring.rank_places(
+            enriched_places,
+            intent=intent
+        )
+
+        # 6️⃣ Add explanations
+        for place in ranked_places:
+            place["explanation"] = self.explainer.generate_explanation(
+                place=place,
+                intent=intent
+            )
 
         return {
-            "results": explained[:10],   # top 10
-            "total_found": len(explained),
-            "strategy_used": plan
+            "intent": intent.model_dump(),
+            "strategy_used": plan,
+            "total_found": len(ranked_places),
+            "results": ranked_places[:10]
         }

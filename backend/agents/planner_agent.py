@@ -1,65 +1,38 @@
-'''Given user input:
-Mood, Budget, Time
-It decides:
-Place types, Search radius, Priority weights, Whether booking might be required'''
-from typing import Dict, List, Optional
+from typing import Dict
+from schemas.user_intent import UserIntent
+
+
 class PlannerAgent:
     """
-    PlannerAgent converts user intent into a structured search plan.
+    Converts structured intent into a search plan.
     """
 
     def create_plan(
         self,
-        mood: str,
-        budget: str,
-        time: Optional[str] = None
+        intent: UserIntent,
+        latitude: float,
+        longitude: float
     ) -> Dict:
-        """
-        Creates a planning strategy based on user input.
-        """
 
-        mood = mood.lower()
-        budget = budget.lower()
+        prefs = intent.preferences
 
-        place_types: List[str] = []
-        priorities: List[str] = []
-        radius_km: float = 2.0
-        booking_likely: bool = False
+        place_types = intent.place_types or ["restaurant", "cafe"]
+        priorities = ["distance", "rating"]
+        radius_km = 2.0
+        booking_likely = intent.booking_required
 
-        # ---- Mood-based planning ----
-        if mood == "work":
-            place_types = ["cafe", "coworking_space", "library"]
-            priorities = ["quiet", "wifi", "distance"]
-            radius_km = 2.0
-            booking_likely = False
+        # Crowd sensitivity
+        if prefs.get("crowd_quietness", 0) > 0.7:
+            priorities.append("low_crowd")
+            radius_km += 1.0
 
-        elif mood == "date":
-            place_types = ["restaurant", "cafe"]
-            priorities = ["ambience", "rating", "distance"]
-            radius_km = 3.0
-            booking_likely = True
-
-        elif mood == "quick bite":
-            place_types = ["fast_food", "cafe"]
-            priorities = ["speed", "distance", "price"]
-            radius_km = 1.5
-            booking_likely = False
-
-        else:
-            # Fallback
-            place_types = ["restaurant", "cafe"]
-            priorities = ["rating", "distance"]
-            booking_likely = True
-
-        # ---- Budget adjustment ----
-        if budget == "low":
-            priorities.append("price")
-        elif budget == "high":
+        # Food importance
+        if prefs.get("food_quality", 0) > 0.7:
             priorities.append("rating")
 
-        # ---- Time-based adjustment (optional) ----
-        if time:
-            priorities.append("open_now")
+        # Travel tolerance
+        if prefs.get("travel_tolerance", 0) < 0.4:
+            radius_km = min(radius_km, 2.0)
 
         return {
             "place_types": place_types,
