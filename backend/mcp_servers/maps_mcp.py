@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import RequestException, Timeout
 from typing import List, Dict, Optional
 import os
 from dotenv import load_dotenv
@@ -61,8 +62,6 @@ class MapboxMCP:
 
         return places
 
-
-
     def get_travel_time(
         self,
         origin_lat: float,
@@ -71,7 +70,8 @@ class MapboxMCP:
         dest_lng: float
     ) -> Dict:
         """
-        Get ETA + distance using Mapbox Traffic Directions
+        Returns distance (km) and traffic-aware travel time (minutes).
+        Gracefully degrades on network failure.
         """
 
         url = (
@@ -85,17 +85,25 @@ class MapboxMCP:
             "access_token": MAPBOX_TOKEN
         }
 
-        res = requests.get(url, params=params, timeout=5)
-        res.raise_for_status()
-        data = res.json()
+        try:
+            res = requests.get(url, params=params, timeout=5)
+            res.raise_for_status()
+            data = res.json()
 
-        routes = data.get("routes")
-        if not routes:
-            raise RuntimeError("No routes returned by Mapbox")
+            routes = data.get("routes")
+            if not routes:
+                raise RuntimeError("No routes returned")
 
-        route = routes[0]
+            route = routes[0]
 
-        return {
-            "distance_km": round(route["distance"] / 1000, 2),
-            "travel_time": int(route["duration"] // 60)  # min
-        }
+            return {
+                "distance_km": round(route["distance"] / 1000, 2),
+                "travel_time": int(route["duration"] // 60)
+            }
+
+        except (Timeout, RequestException):
+            # ---- SAFE FALLBACK ----
+            return {
+                "distance_km": None,
+                "travel_time": None
+            }
