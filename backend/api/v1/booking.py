@@ -8,6 +8,7 @@ class BookingRequest(BaseModel):
     time: str
     people: int
     user_name: str
+    confirm: bool
 
 @router.post("/create")
 def create_booking(request: BookingRequest):
