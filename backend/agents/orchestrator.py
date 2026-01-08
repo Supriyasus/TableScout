@@ -1,13 +1,13 @@
 from typing import Dict, List
 
-from agents.intent_extraction_agent import IntentExtractionAgent
-from mcp_servers.maps_mcp import MapboxMCP
+from backend.agents.intent_extraction_agent import IntentExtractionAgent
+from backend.mcp_servers.maps_mcp import MapboxMCP
 
-from agents.planner_agent import PlannerAgent
-from agents.traffic_agent import TrafficAgent
-from agents.popularity_agent import PopularityAgent
-from agents.scoring_agent import ScoringAgent
-from agents.explanation_agent import ExplanationAgent
+from backend.agents.planner_agent import PlannerAgent
+from backend.agents.traffic_agent import TrafficAgent
+from backend.agents.popularity_agent import PopularityAgent
+from backend.agents.scoring_agent import ScoringAgent
+from backend.agents.explanation_agent import ExplanationAgent
 
 
 class OrchestratorAgent:

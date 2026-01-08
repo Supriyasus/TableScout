@@ -1,6 +1,6 @@
 import re
-from schemas.user_intent import UserIntent
-from agents.gemini_client import call_gemini
+from backend.schemas.user_intent import UserIntent
+from backend.agents.gemini_client import call_gemini
 
 
 def extract_json(text: str) -> str:

@@ -12,4 +12,7 @@ class BookingRequest(BaseModel):
 
 @router.post("/create")
 def create_booking(request: BookingRequest):
-    return {"message": "Booking API working"}
+    return {
+        "status": "pending",
+        "message": "Booking request received. Booking MCP will be added soon."
+    }

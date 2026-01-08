@@ -1,29 +1,31 @@
-export async function fetchPlaces(query) {
-  console.log("User query:", query);
+const API_BASE = "http://127.0.0.1:8000/api/v1";
 
-  // Simulate AI + MCP processing
-  await new Promise((r) => setTimeout(r, 1000));
+export async function fetchPlaces(query, latitude, longitude) {
+  const response = await fetch(`${API_BASE}/places/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      query,
+      latitude,
+      longitude,
+    }),
+  });
 
-  return [
-    {
-      id: 1,
-      name: "Blue Tokai",
-      rating: 4.5,
-      distance: "700m",
-      time: "8 min",
-      crowd: "Low",
-      price: "₹₹",
-      reason: "Quiet during evenings, affordable, low crowd at 5 PM",
-    },
-    {
-      id: 2,
-      name: "Third Wave Coffee",
-      rating: 4.3,
-      distance: "1.2 km",
-      time: "10 min",
-      crowd: "Medium",
-      price: "₹₹",
-      reason: "Good ambience but slightly busy after 6 PM",
-    },
-  ];
+  if (!response.ok) {
+    throw new Error("Failed to fetch recommendations");
+  }
+
+  const data = await response.json();
+  console.log("API response:", data);
+
+  return data.results.map((p) => ({
+    id: p.place_id,
+    name: p.name,
+    rating: p.rating || "N/A",
+    distance: p.distance_km ? `${p.distance_km} km` : "?",
+    time: p.travel_time ? `${p.travel_time} min` : "?",
+    crowd: p.crowd_level || "Unknown",
+    price: "₹₹",
+    reason: p.explanation,
+  }));
 }

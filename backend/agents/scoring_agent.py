@@ -1,5 +1,5 @@
 from typing import Dict, List
-from schemas.user_intent import UserIntent
+from backend.schemas.user_intent import UserIntent
 
 
 class ScoringAgent:

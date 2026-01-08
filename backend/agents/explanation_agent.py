@@ -1,5 +1,5 @@
 from typing import Dict
-from schemas.user_intent import UserIntent
+from backend.schemas.user_intent import UserIntent
 
 
 class ExplanationAgent:

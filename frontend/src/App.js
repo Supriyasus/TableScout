@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchPlaces } from "./api";
 import PlaceCard from "./components/PlaceCard";
 
@@ -6,8 +6,25 @@ export default function App() {
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hi! What are you looking for today?" }
   ]);
+
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const [location, setLocation] = useState(null);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocation({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      },
+      () => {
+        setLocation({ latitude: 28.6139, longitude: 77.2090 }); // fallback
+      }
+    );
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -16,12 +33,20 @@ export default function App() {
     const query = input;
     setInput("");
 
+    if (!location) {
+      setMessages((m) => [
+        ...m,
+        { role: "ai", text: "Fetching your location… Please try again." }
+      ]);
+      return;
+    }
+
     setMessages((m) => [
       ...m,
       { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
     ]);
 
-    const places = await fetchPlaces(query);
+    const places = await fetchPlaces(query, location.latitude, location.longitude);
 
     setMessages((m) => [
       ...m,
@@ -32,18 +57,11 @@ export default function App() {
 
   return (
     <div className="app-root">
-      {/* Top Navbar */}
+      {/* Navbar */}
       <div className="navbar">
         <div className="nav-title">TableScout</div>
-
         <div className="nav-menu">
-          <button
-            className="menu-btn"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            ☰
-          </button>
-
+          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
           {menuOpen && (
             <div className="dropdown">
               <div className="dropdown-item">About Us</div>
@@ -58,22 +76,14 @@ export default function App() {
         {messages.map((msg, i) => (
           <div key={i}>
             {msg.role === "user" && (
-              <div className="message-user">
-                <span>{msg.text}</span>
-              </div>
+              <div className="message-user"><span>{msg.text}</span></div>
             )}
-
             {msg.role === "ai" && msg.text && (
-              <div className="message-ai">
-                <span>{msg.text}</span>
-              </div>
+              <div className="message-ai"><span>{msg.text}</span></div>
             )}
-
             {msg.type === "places" && (
               <div className="places-wrapper">
-                {msg.data.map((p) => (
-                  <PlaceCard key={p.id} place={p} />
-                ))}
+                {msg.data.map((p) => <PlaceCard key={p.id} place={p} />)}
               </div>
             )}
           </div>
