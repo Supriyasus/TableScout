@@ -1,13 +1,35 @@
 import { useState } from "react";
 import { fetchPlaces } from "./api";
 import PlaceCard from "./components/PlaceCard";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 export default function App() {
+  const [userId, setUserId] = useState(
+    localStorage.getItem("user_id")
+  );
+  const [authMode, setAuthMode] = useState("login");
+
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hi! What are you looking for today?" }
   ]);
   const [input, setInput] = useState("");
+
   const [menuOpen, setMenuOpen] = useState(false);
+
+  if (!userId) {
+    return authMode === "login" ? (
+      <Login
+        onAuthSuccess={(id) => setUserId(id)}
+        switchToSignup={() => setAuthMode("signup")}
+      />
+    ) : (
+      <Signup
+        onAuthSuccess={(id) => setUserId(id)}
+        switchToLogin={() => setAuthMode("login")}
+      />
+    );
+  }
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -30,6 +52,13 @@ export default function App() {
     ]);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+    setUserId(null);
+    setAuthMode("login");
+  };
+
   return (
     <div className="app-root">
       {/* Top Navbar */}
@@ -46,8 +75,22 @@ export default function App() {
 
           {menuOpen && (
             <div className="dropdown">
-              <div className="dropdown-item">About Us</div>
-              <div className="dropdown-item">Logout</div>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  alert("TableScout helps you discover and book restaurants intelligently.");
+                  setMenuOpen(false);
+                }}
+              >
+                About Us
+              </button>
+
+              <button
+                className="dropdown-item danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </div>
           )}
         </div>

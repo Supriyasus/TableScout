@@ -1,6 +1,5 @@
 from typing import Dict
 
-
 class TrafficAgent:
     """
     Normalizes travel time using traffic heuristics.

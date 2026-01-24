@@ -1,17 +1,16 @@
-from typing import Dict, List, Optional
+from typing import Dict, Optional, List
 
-from agents.intent_extraction_agent import IntentExtractionAgent
-from agents.planner_agent import PlannerAgent
-from agents.traffic_agent import TrafficAgent
-from agents.popularity_agent import PopularityAgent
-from agents.scoring_agent import ScoringAgent
-from agents.explanation_agent import ExplanationAgent
+from backend.agents.intent_extraction_agent import IntentExtractionAgent
+from backend.agents.planner_agent import PlannerAgent
+from backend.agents.traffic_agent import TrafficAgent
+from backend.agents.popularity_agent import PopularityAgent
+from backend.agents.scoring_agent import ScoringAgent
+from backend.agents.explanation_agent import ExplanationAgent
 
-from mcp_servers.maps_mcp import MapboxMCP
+from backend.mcp_servers.maps_mcp import MapboxMCP
 
 from sqlalchemy.orm import Session
-from db.crud import get_user_preferences
-
+from backend.db.crud import get_user_preferences
 
 class OrchestratorAgent:
     """
@@ -36,22 +35,22 @@ class OrchestratorAgent:
         longitude: float,
         db: Session,
         user_id: Optional[str] = None
-    ) -> Dict:
-        """
-        End-to-end recommendation pipeline (personalized)
-        """
+        ) -> Dict:
+
 
         # 1️⃣ Natural language → structured intent
         intent = self.intent_agent.extract(user_query)
 
-        # 2️⃣ Load user preferences (NEW)
+        # 2️⃣ Load user preferences (from DB)
         user_preferences = None
         if user_id:
             pref_record = get_user_preferences(db, user_id)
             if pref_record:
                 user_preferences = pref_record.preferences
 
-        # 3️⃣ Planner decides search strategy (still intent-only)
+        visited_places = user_preferences.get("visited_places", []) if user_preferences else []
+
+        # 3️⃣ Planner decides search strategy
         plan = self.planner.create_plan(
             intent=intent,
             latitude=latitude,
@@ -74,46 +73,44 @@ class OrchestratorAgent:
 
         # 5️⃣ Enrich each place
         for place in all_places:
-
-            # ---- Travel ----
             travel = self.maps.get_travel_time(
                 origin_lat=latitude,
                 origin_lng=longitude,
                 dest_lat=place["latitude"],
                 dest_lng=place["longitude"]
             )
-
             place["distance_km"] = travel["distance_km"]
             place["travel_time"] = travel["travel_time"]
 
-            # ---- Traffic normalization ----
             traffic = self.traffic.analyze_traffic(place)
             place.update(traffic)
 
-            # ---- Popularity ----
             pop = self.popularity.estimate_crowd(
                 place=place,
                 time_of_day=intent.time_of_day
             )
-
             place["crowd_level"] = pop["crowd_level"]
             place["crowd_confidence"] = pop["confidence"]
 
             enriched_places.append(place)
 
-        # 6️⃣ Score + rank (intent + preferences) ✅
+        # 6️⃣ Filter out visited places (memory-based personalization)
+        new_places = [p for p in enriched_places if p["name"] not in visited_places]
+
+        # 7️⃣ Score + rank (intent + preferences)
         ranked_places = self.scoring.rank_places(
-            enriched_places,
+            new_places,
             intent=intent,
             user_preferences=user_preferences
         )
 
-        # 7️⃣ Add explanations
+        # 8️⃣ Add explanations
         for place in ranked_places:
             place["explanation"] = self.explainer.generate_explanation(
                 place=place,
                 intent=intent,
-                user_preferences=user_preferences
+                user_preferences=user_preferences,
+                visited_places=visited_places
             )
 
         return {
