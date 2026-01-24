@@ -1,15 +1,26 @@
-from typing import Dict
-from schemas.user_intent import UserIntent
-
+from typing import Dict, Optional, List
+from backend.schemas.user_intent import UserIntent
 
 class ExplanationAgent:
     """
     Generates human-readable explanations
-    grounded in intent + place attributes.
+    grounded in intent, place attributes, and user preferences.
     """
 
-    def generate_explanation(self, place: Dict, intent: UserIntent) -> str:
+    def generate_explanation(
+        self,
+        place: Dict,
+        intent: UserIntent,
+        user_preferences: Optional[Dict] = None,
+        visited_places: Optional[List[str]] = None
+    ) -> str:
         parts = []
+
+        # Unique place check
+        if visited_places and place["name"] in visited_places:
+            parts.append("you have already visited this place before")
+        else:
+            parts.append("this is a new place you haven't been to yet")
 
         # Travel time
         travel_time = place.get("travel_time")
@@ -32,11 +43,11 @@ class ExplanationAgent:
 
         # Preference alignment
         if intent.descriptors:
-            parts.append(
-                f"it matches your preference for {', '.join(intent.descriptors[:2])}"
-            )
+            parts.append(f"it matches your preference for {', '.join(intent.descriptors[:2])}")
 
-        if not parts:
-            return "This place matches your preferences."
+        if user_preferences and "place_type_affinity" in user_preferences:
+            affinity = user_preferences["place_type_affinity"].get(place.get("category"))
+            if affinity:
+                parts.append(f"your affinity for {place['category']} boosted this recommendation")
 
         return "I recommended this place because " + ", ".join(parts) + "."

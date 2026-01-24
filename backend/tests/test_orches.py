@@ -1,5 +1,6 @@
-from agents.orchestrator import OrchestratorAgent
-from api.v1.places import PlaceRequest
+from backend.agents.orchestrator import OrchestratorAgent
+from backend.api.v1.places import PlaceRequest
+from backend.db.session import SessionLocal
 
 orchestrator = OrchestratorAgent()
 
@@ -8,8 +9,9 @@ req = PlaceRequest(
     latitude=28.6139,
     longitude=77.2090
 )
-
+db = SessionLocal()
 result = orchestrator.get_recommendations(
+    db=db,
     user_query=req.query,
     latitude=req.latitude,
     longitude=req.longitude

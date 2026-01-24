@@ -2,36 +2,36 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from datetime import datetime
-from api.v1.deps import get_db
-from db.models import UserPreference
+from backend.api.v1.deps import get_db, get_current_user
+from backend.db.models import UserPreference
 
 
 router = APIRouter(prefix="/user", tags=["User"])
 
 class UserInteraction(BaseModel):
-    user_id: str
     signal: str
     place_type: str
 
 @router.post("/interact")
 def record_user_interaction(
     interaction: UserInteraction,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
     """
-    Stores user preference signals in PostgreSQL
+    Records user preference signals for authenticated user
     """
 
     record = (
         db.query(UserPreference)
-        .filter(UserPreference.user_id == interaction.user_id)
+        .filter(UserPreference.user_id == current_user)
         .first()
     )
 
     # Case 1: first time user
     if not record:
         record = UserPreference(
-            user_id=interaction.user_id,
+            user_id=current_user,
             preferences={
                 "place_type_affinity": {
                     interaction.place_type: 1.0
@@ -56,21 +56,24 @@ def record_user_interaction(
 
     db.commit()
 
-    return {"status": "stored"}
+    return {"status": "stored", "user_id": current_user}
 
 @router.get("/preferences")
 def get_user_preferences(
-    user_id: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: str = Depends(get_current_user)
 ):
+    """
+    Get preferences for authenticated user
+    """
     record = (
         db.query(UserPreference)
-        .filter(UserPreference.user_id == user_id)
+        .filter(UserPreference.user_id == current_user)
         .first()
     )
 
     if not record:
-        return {"user_id": user_id, "preferences": {}}
+        return {"user_id": current_user, "preferences": {}}
 
     return {
         "user_id": record.user_id,

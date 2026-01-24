@@ -14,3 +14,5 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine
 )
+
+get_db = SessionLocal

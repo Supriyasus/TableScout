@@ -1,5 +1,14 @@
-from agents.scoring_agent import ScoringAgent
-from schemas.user_intent import UserIntent
+from backend.agents.scoring_agent import ScoringAgent
+from backend.schemas.user_intent import UserIntent
+
+def make_intent():
+    return UserIntent(
+        query="I want a calm cozy place to hang out with good food",
+        categories=["cafe", "restaurant"],
+        min_rating=3.5,
+        max_travel_time=30,
+        crowd_preference="medium"
+    )
 
 def test_score_place_with_user_preferences_boost():
     agent = ScoringAgent()

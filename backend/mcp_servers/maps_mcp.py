@@ -10,9 +10,6 @@ MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
 if not MAPBOX_TOKEN:
     raise RuntimeError("MAPBOX_TOKEN not set")
 
-# MAPBOX_TOKEN = os.getenv("MAPBOX_TOKEN")
-# MAPBOX_TOKEN = "pk.eyJ1IjoicHJhdHl1c2hkdWJlIiwiYSI6ImNtamlxYW1xZTFvemIzZHM2Y2k2ZTN5ZjYifQ._HVSCVKGv8V4GiVD6PFH1w"
-
 class MapboxMCP:
 
     GEOCODE_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places"
