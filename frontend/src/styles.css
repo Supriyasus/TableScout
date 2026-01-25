@@ -193,3 +193,56 @@ body {
 .dropdown-item.danger:hover {
   background: #2a1f1f;
 }
+
+/* Auth cards */
+.auth-card {
+  background: #393e46;
+  padding: 28px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 380px;
+  margin: 80px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-card h2 {
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.auth-card input {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #222831;
+  color: white;
+  outline: none;
+}
+
+.auth-card button {
+  margin-top: 8px;
+  padding: 12px;
+  background: #948979;
+  color: #222831;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-error {
+  color: #ffb4b4;
+  font-size: 14px;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+}
+
+.auth-switch span {
+  color: #948979;
+  cursor: pointer;
+}

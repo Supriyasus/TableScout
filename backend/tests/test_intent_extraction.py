@@ -1,4 +1,4 @@
-from agents.intent_extraction_agent import IntentExtractionAgent
+from backend.agents.intent_extraction_agent import IntentExtractionAgent
 
 def main():
     agent = IntentExtractionAgent()

@@ -1,6 +1,5 @@
 from typing import Dict, Optional
 
-
 class PopularityAgent:
     """
     Estimates how crowded a place is.
