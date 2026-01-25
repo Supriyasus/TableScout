@@ -5,7 +5,7 @@ frontend/build/
 # Python
 backend/venv/
 backend/__pycache__/
-backend/.env
+.env
 
 # OS / Editor
 .DS_Store
