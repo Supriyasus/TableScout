@@ -4,17 +4,42 @@ import PlaceCard from "./components/PlaceCard";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
 
+// Helper: get location from browser or fallback to IP
+async function getUserLocation() {
+  return new Promise((resolve) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        },
+        async () => {
+          // Fallback to IP-based location
+          try {
+            const res = await fetch("https://ipapi.co/json/");
+            const data = await res.json();
+            resolve({ latitude: data.latitude, longitude: data.longitude });
+          } catch {
+            resolve({ latitude: 0, longitude: 0 }); // fallback default
+          }
+        }
+      );
+    } else {
+      resolve({ latitude: 0, longitude: 0 });
+    }
+  });
+}
+
 export default function App() {
-  const [userId, setUserId] = useState(
-    localStorage.getItem("user_id")
-  );
+  const [userId, setUserId] = useState(localStorage.getItem("user_id"));
   const [authMode, setAuthMode] = useState("login");
 
   const [messages, setMessages] = useState([
-    { role: "ai", text: "Hi! What are you looking for today?" }
+    { role: "ai", text: "Hi! What are you looking for today?" },
   ]);
   const [input, setInput] = useState("");
-
   const [menuOpen, setMenuOpen] = useState(false);
 
   if (!userId) {
@@ -40,16 +65,32 @@ export default function App() {
 
     setMessages((m) => [
       ...m,
-      { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
+      { role: "ai", text: "Checking nearby places considering traffic and crowd…" },
     ]);
 
-    const places = await fetchPlaces(query);
+    try {
+      const { latitude, longitude } = await getUserLocation();
+      const places = await fetchPlaces(query, latitude, longitude);
 
-    setMessages((m) => [
-      ...m,
-      { role: "ai", type: "places", data: places },
-      { role: "ai", text: "Would you like me to book one of these?" }
-    ]);
+      if (!places || places.length === 0) {
+        setMessages((m) => [
+          ...m,
+          { role: "ai", text: "Sorry, I couldn’t find any recommendations right now." },
+        ]);
+      } else {
+        setMessages((m) => [
+          ...m,
+          { role: "ai", type: "places", data: places },
+          { role: "ai", text: "Would you like me to book one of these?" },
+        ]);
+      }
+    } catch (err) {
+      console.error("Error fetching places:", err);
+      setMessages((m) => [
+        ...m,
+        { role: "ai", text: "Failed to fetch recommendations. Please try again later." },
+      ]);
+    }
   };
 
   const handleLogout = () => {
@@ -66,10 +107,7 @@ export default function App() {
         <div className="nav-title">TableScout</div>
 
         <div className="nav-menu">
-          <button
-            className="menu-btn"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
             ☰
           </button>
 
@@ -85,10 +123,7 @@ export default function App() {
                 About Us
               </button>
 
-              <button
-                className="dropdown-item danger"
-                onClick={handleLogout}
-              >
+              <button className="dropdown-item danger" onClick={handleLogout}>
                 Logout
               </button>
             </div>

@@ -5,7 +5,6 @@ from datetime import datetime
 from backend.api.v1.deps import get_db, get_current_user
 from backend.db.models import UserPreference
 
-
 router = APIRouter(prefix="/user", tags=["User"])
 
 class UserInteraction(BaseModel):

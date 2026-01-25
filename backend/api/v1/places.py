@@ -37,3 +37,11 @@ def recommend_places(
             "error": str(e),
             "message": "Failed to get recommendations"
         }
+
+@router.get("/places")
+def get_places(query: str, db: Session = Depends(get_db)):
+    try:
+        results = orchestrator.get_recommendations(query, db)
+        return results
+    except Exception as e:
+        return []

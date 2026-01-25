@@ -27,19 +27,52 @@ class ExplanationAgent:
         if travel_time is not None:
             parts.append(f"it is about {travel_time} minutes away considering traffic")
 
-        # Rating
-        rating = place.get("rating")
-        if rating:
-            parts.append(f"it has a rating of {rating}")
-
         # Crowd
         crowd = place.get("crowd_level")
+        category = place.get("category", "").lower()
+
         if crowd == "low":
-            parts.append("it is usually quiet at this time")
+            if category == "bar":
+                parts.append("it has a relaxed vibe right now")
+            elif category == "cafe":
+                parts.append("it’s peaceful and not too busy")
+            elif category == "restaurant":
+                parts.append("it’s calm and easy to get a table")
+            elif category == "lounge":
+                parts.append("it’s quiet and perfect for unwinding")
+            elif category == "bakery":
+                parts.append("it’s cozy with only a few customers")
+            else:
+                parts.append("it’s quiet at this time")
+
         elif crowd == "medium":
-            parts.append("it has a moderate crowd level")
+            if category == "bar":
+                parts.append("it has a good buzz without being overwhelming")
+            elif category == "cafe":
+                parts.append("it has a steady flow of visitors")
+            elif category == "restaurant":
+                parts.append("it’s moderately busy, but tables are available")
+            elif category == "lounge":
+                parts.append("it has a balanced atmosphere with some groups around")
+            elif category == "bakery":
+                parts.append("it’s pleasantly active with regular customers")
+            else:
+                parts.append("it has a moderate crowd level")
+
         elif crowd == "high":
-            parts.append("it can be crowded right now")
+            if category == "bar":
+                parts.append("it’s lively and packed right now")
+            elif category == "cafe":
+                parts.append("it’s bustling with people enjoying coffee")
+            elif category == "restaurant":
+                parts.append("it’s busy and may require a wait")
+            elif category == "lounge":
+                parts.append("it’s buzzing with activity and groups")
+            elif category == "bakery":
+                parts.append("it’s crowded with customers picking up fresh items")
+            else:
+                parts.append("it can be crowded right now")
+
 
         # Preference alignment
         if intent.descriptors:
