@@ -33,7 +33,7 @@ if places:
     print(time_data)
 '''
 
-from mcp_servers.maps_mcp import MapboxMCP
+from backend.mcp_servers.maps_mcp import MapboxMCP
 
 mcp = MapboxMCP()
 

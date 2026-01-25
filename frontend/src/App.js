@@ -1,30 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { fetchPlaces } from "./api";
 import PlaceCard from "./components/PlaceCard";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 export default function App() {
+  const [userId, setUserId] = useState(
+    localStorage.getItem("user_id")
+  );
+  const [authMode, setAuthMode] = useState("login");
+
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hi! What are you looking for today?" }
   ]);
-
   const [input, setInput] = useState("");
+
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const [location, setLocation] = useState(null);
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocation({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-      },
-      () => {
-        setLocation({ latitude: 28.6139, longitude: 77.2090 }); // fallback
-      }
+  if (!userId) {
+    return authMode === "login" ? (
+      <Login
+        onAuthSuccess={(id) => setUserId(id)}
+        switchToSignup={() => setAuthMode("signup")}
+      />
+    ) : (
+      <Signup
+        onAuthSuccess={(id) => setUserId(id)}
+        switchToLogin={() => setAuthMode("login")}
+      />
     );
-  }, []);
+  }
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -33,20 +38,12 @@ export default function App() {
     const query = input;
     setInput("");
 
-    if (!location) {
-      setMessages((m) => [
-        ...m,
-        { role: "ai", text: "Fetching your location… Please try again." }
-      ]);
-      return;
-    }
-
     setMessages((m) => [
       ...m,
       { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
     ]);
 
-    const places = await fetchPlaces(query, location.latitude, location.longitude);
+    const places = await fetchPlaces(query);
 
     setMessages((m) => [
       ...m,
@@ -55,17 +52,45 @@ export default function App() {
     ]);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+    setUserId(null);
+    setAuthMode("login");
+  };
+
   return (
     <div className="app-root">
-      {/* Navbar */}
+      {/* Top Navbar */}
       <div className="navbar">
         <div className="nav-title">TableScout</div>
+
         <div className="nav-menu">
-          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+          <button
+            className="menu-btn"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            ☰
+          </button>
+
           {menuOpen && (
             <div className="dropdown">
-              <div className="dropdown-item">About Us</div>
-              <div className="dropdown-item">Logout</div>
+              <button
+                className="dropdown-item"
+                onClick={() => {
+                  alert("TableScout helps you discover and book restaurants intelligently.");
+                  setMenuOpen(false);
+                }}
+              >
+                About Us
+              </button>
+
+              <button
+                className="dropdown-item danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
             </div>
           )}
         </div>
@@ -76,14 +101,22 @@ export default function App() {
         {messages.map((msg, i) => (
           <div key={i}>
             {msg.role === "user" && (
-              <div className="message-user"><span>{msg.text}</span></div>
+              <div className="message-user">
+                <span>{msg.text}</span>
+              </div>
             )}
+
             {msg.role === "ai" && msg.text && (
-              <div className="message-ai"><span>{msg.text}</span></div>
+              <div className="message-ai">
+                <span>{msg.text}</span>
+              </div>
             )}
+
             {msg.type === "places" && (
               <div className="places-wrapper">
-                {msg.data.map((p) => <PlaceCard key={p.id} place={p} />)}
+                {msg.data.map((p) => (
+                  <PlaceCard key={p.id} place={p} />
+                ))}
               </div>
             )}
           </div>
