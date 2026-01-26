@@ -6,8 +6,6 @@ import Signup from "./components/Signup";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import About from "./components/About";
 
-<<<<<<< HEAD
-=======
 async function getUserLocation() {
   return new Promise((resolve) => {
     if (navigator.geolocation) {
@@ -34,7 +32,6 @@ async function getUserLocation() {
   });
 }
 
->>>>>>> c89c34fcfdf8f5db8ec518a2a8f35859f8614e4e
 export default function App() {
   const [userId, setUserId] = useState(
     localStorage.getItem("user_id")
@@ -65,6 +62,29 @@ export default function App() {
     );
   }
 
+  // const sendMessage = async () => {
+  //   if (!input.trim()) return;
+
+  //   setMessages((m) => [...m, { role: "user", text: input }]);
+  //   const query = input;
+  //   setInput("");
+
+  //   setMessages((m) => [
+  //     ...m,
+  //     { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
+  //   ]);
+
+  //   const places = await fetchPlaces(query);
+
+  //   setMessages((m) => [
+  //     ...m,
+  //     { role: "ai", type: "places", data: places },
+  //     { role: "ai", text: "Would you like me to book one of these?" }
+  //   ]);
+  // };
+
+
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -77,14 +97,24 @@ export default function App() {
       { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
     ]);
 
-    const places = await fetchPlaces(query);
+    try {
+      const { latitude, longitude } = await getUserLocation(); // ✅ Get location
+      const places = await fetchPlaces(query, latitude, longitude); // ✅ Pass it
 
-    setMessages((m) => [
-      ...m,
-      { role: "ai", type: "places", data: places },
-      { role: "ai", text: "Would you like me to book one of these?" }
-    ]);
+      setMessages((m) => [
+        ...m,
+        { role: "ai", type: "places", data: places },
+        { role: "ai", text: "Would you like me to book one of these?" }
+      ]);
+    } catch (err) {
+      setMessages((m) => [
+        ...m,
+        { role: "ai", text: "Sorry, I couldn't fetch recommendations right now." }
+      ]);
+      console.error("Error fetching places:", err);
+    }
   };
+  
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -116,15 +146,7 @@ export default function App() {
               >
                 About Us
               </button>
-<<<<<<< HEAD
-
-              <button
-                className="dropdown-item danger"
-                onClick={handleLogout}
-              >
-=======
               <button className="dropdown-item danger" onClick={handleLogout}>
->>>>>>> c89c34fcfdf8f5db8ec518a2a8f35859f8614e4e
                 Logout
               </button>
             </div>
