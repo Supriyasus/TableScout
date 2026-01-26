@@ -23,7 +23,6 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(api_router)
 
-
 @app.get("/health")
 def health(db: Session = Depends(get_db)):
     try:
