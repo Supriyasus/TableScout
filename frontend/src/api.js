@@ -21,11 +21,9 @@ export async function fetchPlaces(query, latitude, longitude) {
   return data.results.map((p) => ({
     id: p.place_id,
     name: p.name,
-    rating: p.rating || "N/A",
     distance: p.distance_km ? `${p.distance_km} km` : "?",
     time: p.travel_time ? `${p.travel_time} min` : "?",
     crowd: p.crowd_level || "Unknown",
     price: "₹₹",
-    reason: p.explanation,
   }));
 }

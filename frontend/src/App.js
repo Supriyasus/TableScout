@@ -3,12 +3,44 @@ import { fetchPlaces } from "./api";
 import PlaceCard from "./components/PlaceCard";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import About from "./components/About";
 
+<<<<<<< HEAD
+=======
+async function getUserLocation() {
+  return new Promise((resolve) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+        },
+        async () => {
+          try {
+            const res = await fetch("https://ipapi.co/json/");
+            const data = await res.json();
+            resolve({ latitude: data.latitude, longitude: data.longitude });
+          } catch {
+            resolve({ latitude: 0, longitude: 0 });
+          }
+        }
+      );
+    } else {
+      resolve({ latitude: 0, longitude: 0 });
+    }
+  });
+}
+
+>>>>>>> c89c34fcfdf8f5db8ec518a2a8f35859f8614e4e
 export default function App() {
   const [userId, setUserId] = useState(
     localStorage.getItem("user_id")
   );
   const [authMode, setAuthMode] = useState("login");
+  const [showAbout, setShowAbout] = useState(false);
 
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hi! What are you looking for today?" }
@@ -16,6 +48,8 @@ export default function App() {
   const [input, setInput] = useState("");
 
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   if (!userId) {
     return authMode === "login" ? (
@@ -61,10 +95,9 @@ export default function App() {
 
   return (
     <div className="app-root">
-      {/* Top Navbar */}
+      {/* Navbar */}
       <div className="navbar">
         <div className="nav-title">TableScout</div>
-
         <div className="nav-menu">
           <button
             className="menu-btn"
@@ -72,23 +105,26 @@ export default function App() {
           >
             ☰
           </button>
-
           {menuOpen && (
             <div className="dropdown">
               <button
                 className="dropdown-item"
                 onClick={() => {
-                  alert("TableScout helps you discover and book restaurants intelligently.");
+                  setShowAbout(true); 
                   setMenuOpen(false);
                 }}
               >
                 About Us
               </button>
+<<<<<<< HEAD
 
               <button
                 className="dropdown-item danger"
                 onClick={handleLogout}
               >
+=======
+              <button className="dropdown-item danger" onClick={handleLogout}>
+>>>>>>> c89c34fcfdf8f5db8ec518a2a8f35859f8614e4e
                 Logout
               </button>
             </div>
@@ -96,45 +132,56 @@ export default function App() {
         </div>
       </div>
 
-      {/* Chat */}
-      <div className="chat-container">
-        {messages.map((msg, i) => (
-          <div key={i}>
-            {msg.role === "user" && (
-              <div className="message-user">
-                <span>{msg.text}</span>
-              </div>
-            )}
-
-            {msg.role === "ai" && msg.text && (
-              <div className="message-ai">
-                <span>{msg.text}</span>
-              </div>
-            )}
-
-            {msg.type === "places" && (
-              <div className="places-wrapper">
-                {msg.data.map((p) => (
-                  <PlaceCard key={p.id} place={p} />
+      {/* Routes */}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              {/* Chat UI */}
+              <div className="chat-container">
+                {messages.map((msg, i) => (
+                  <div key={i}>
+                    {msg.role === "user" && (
+                      <div className="message-user">
+                        <span>{msg.text}</span>
+                      </div>
+                    )}
+                    {msg.role === "ai" && msg.text && (
+                      <div className="message-ai">
+                        <span>{msg.text}</span>
+                      </div>
+                    )}
+                    {msg.type === "places" && (
+                      <div className="places-wrapper">
+                        {msg.data.map((p) => (
+                          <PlaceCard key={p.id} place={p} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
 
-      {/* Input */}
-      <div className="input-wrapper">
-        <div className="input-bar">
-          <input
-            placeholder="Ask for nearby places…"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          />
-          <button onClick={sendMessage}>Send</button>
-        </div>
-      </div>
+              {/* Input */}
+              <div className="input-wrapper">
+                <div className="input-bar">
+                  <input
+                    placeholder="Ask for nearby places…"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  />
+                  <button onClick={sendMessage}>Send</button>
+                </div>
+              </div>
+            </>
+          }
+        />
+        <Route path="/about" element={<About />} /> {/* About Page Route */}
+      </Routes>
+      {showAbout && <About onClose={() => setShowAbout(false)} />}
+
     </div>
   );
 }

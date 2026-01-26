@@ -7,7 +7,6 @@ export default function PlaceCard({ place, onClick, selected }) {
     >
       <div className="flex justify-between">
         <h3 className="font-semibold">{place.name}</h3>
-        <span className="text-sm text-zinc-400">⭐ {place.rating ?? "N/A"}</span>
       </div>
 
       <div className="text-sm text-zinc-400 mt-1">

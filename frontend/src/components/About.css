@@ -1,0 +1,39 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(57, 62, 70, 0.6); /* semi-transparent dark */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #DFD0B8;
+  color: #393E46;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;          /* responsive width */
+  max-width: 600px;    /* cap size on larger screens */
+  max-height: 80vh;    /* keep within viewport height */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow-y: auto;    /* scroll inside if content is too tall */
+  text-align: justify;
+}
+
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  background-color: #393E46;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
