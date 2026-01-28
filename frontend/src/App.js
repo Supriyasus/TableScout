@@ -33,19 +33,14 @@ async function getUserLocation() {
 }
 
 export default function App() {
-  const [userId, setUserId] = useState(
-    localStorage.getItem("user_id")
-  );
+  const [userId, setUserId] = useState(localStorage.getItem("user_id"));
   const [authMode, setAuthMode] = useState("login");
   const [showAbout, setShowAbout] = useState(false);
-
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hi! What are you looking for today?" }
   ]);
   const [input, setInput] = useState("");
-
   const [menuOpen, setMenuOpen] = useState(false);
-
   const navigate = useNavigate();
 
   if (!userId) {
@@ -62,29 +57,6 @@ export default function App() {
     );
   }
 
-  // const sendMessage = async () => {
-  //   if (!input.trim()) return;
-
-  //   setMessages((m) => [...m, { role: "user", text: input }]);
-  //   const query = input;
-  //   setInput("");
-
-  //   setMessages((m) => [
-  //     ...m,
-  //     { role: "ai", text: "Checking nearby places considering traffic and crowd…" }
-  //   ]);
-
-  //   const places = await fetchPlaces(query);
-
-  //   setMessages((m) => [
-  //     ...m,
-  //     { role: "ai", type: "places", data: places },
-  //     { role: "ai", text: "Would you like me to book one of these?" }
-  //   ]);
-  // };
-
-
-
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -98,8 +70,8 @@ export default function App() {
     ]);
 
     try {
-      const { latitude, longitude } = await getUserLocation(); // ✅ Get location
-      const places = await fetchPlaces(query, latitude, longitude); // ✅ Pass it
+      const { latitude, longitude } = await getUserLocation();
+      const places = await fetchPlaces(query, latitude, longitude);
 
       setMessages((m) => [
         ...m,
@@ -114,7 +86,6 @@ export default function App() {
       console.error("Error fetching places:", err);
     }
   };
-  
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -123,16 +94,35 @@ export default function App() {
     setAuthMode("login");
   };
 
+  async function handleBooking(placeId) {
+    const token = localStorage.getItem("access_token");
+    const time = new Date().toISOString();
+
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ place_id: placeId, time })
+      });
+
+      const data = await res.json();
+      alert(data.message || "Booking failed");
+    } catch (err) {
+      alert("Booking failed. Please try again.");
+      console.error("Booking error:", err);
+    }
+  }
+
   return (
     <div className="app-root">
       {/* Navbar */}
       <div className="navbar">
         <div className="nav-title">TableScout</div>
         <div className="nav-menu">
-          <button
-            className="menu-btn"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
+          <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
             ☰
           </button>
           {menuOpen && (
@@ -140,7 +130,7 @@ export default function App() {
               <button
                 className="dropdown-item"
                 onClick={() => {
-                  setShowAbout(true); 
+                  setShowAbout(true);
                   setMenuOpen(false);
                 }}
               >
@@ -177,7 +167,12 @@ export default function App() {
                     {msg.type === "places" && (
                       <div className="places-wrapper">
                         {msg.data.map((p) => (
-                          <PlaceCard key={p.id} place={p} />
+                          <div key={p.id} className="place-card">
+                            <PlaceCard place={p} />
+                            <button onClick={() => handleBooking(p.id)}>
+                              Book
+                            </button>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -200,10 +195,9 @@ export default function App() {
             </>
           }
         />
-        <Route path="/about" element={<About />} /> {/* About Page Route */}
+        <Route path="/about" element={<About />} />
       </Routes>
       {showAbout && <About onClose={() => setShowAbout(false)} />}
-
     </div>
   );
 }

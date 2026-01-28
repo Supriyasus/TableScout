@@ -1,8 +1,12 @@
 # db/models.py
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime
+
+
+
+
 
 Base = declarative_base()
 
@@ -20,3 +24,13 @@ class UserPreference(Base):
     user_id = Column(String, primary_key=True)
     preferences = Column(JSONB, nullable=False)
     last_updated = Column(DateTime, default=datetime.utcnow)
+
+
+class Booking(Base):
+    __tablename__ = "bookings"
+
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    place_id = Column(String)
+    time = Column(DateTime)
+    status = Column(String)
