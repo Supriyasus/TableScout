@@ -24,11 +24,11 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     Returns user_id
     """
     token = credentials.credentials
-    print(f"Received token: {token}")
+    #print(f"Received token: {token}")
     try:
         user_id = get_user_id_from_token(token)
-        print(f"Authenticated user: {user_id}")
-        print(f"Token: {token}")
+        '''print(f"Authenticated user: {user_id}")
+        print(f"Token: {token}")'''
         return user_id
     except Exception as e:
         raise HTTPException(

@@ -33,7 +33,7 @@ export default function Login({ onAuthSuccess, switchToSignup }) {
 
   return (
     <div className="auth-card">
-      <h2>Welcome back</h2>
+      <h2>Welcome To TableScout</h2>
 
       <input
         placeholder="Username"

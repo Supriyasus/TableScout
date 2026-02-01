@@ -12,7 +12,7 @@ load_dotenv()
 # Security configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # default: 24 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
