@@ -1,51 +1,53 @@
 const API_BASE = "http://127.0.0.1:8000/api/v1";
 
 export async function fetchPlaces(query, latitude, longitude) {
-  const token = localStorage.getItem("access_token"); // ✅ Get token
+  const token = localStorage.getItem("access_token");
 
-  const response = await fetch(`${API_BASE}/places/recommend`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}` // ✅ Add token here
-    },
-    body: JSON.stringify({
-      query,
-      latitude,
-      longitude,
-    }),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/places/recommend`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        query,
+        latitude,
+        longitude,
+      }),
+    });
 
-  // const response = await fetch("http://127.0.0.1:8000/api/v1/places/recommend", {
-  //   method: "POST",
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     "Authorization": `Bearer ${token}`
-  //   },
-  //   body: JSON.stringify({
-  //     query: "coffee shops",       // ✅ string
-  //     latitude: 28.4595,           // ✅ number
-  //     longitude: 77.0266           // ✅ number
-  //   })
-  // });
+    if (!response.ok) {
+      console.error("API Error:", response.status);
+      throw new Error("Failed to fetch recommendations");
+    }
 
+    const data = await response.json();
+    console.log("API response:", data);
 
+    // 1. FIX: Handle both formats (Direct Array vs { results: [] })
+    const placesList = Array.isArray(data) ? data : (data.results || []);
 
+    // 2. Map the data safely
+    return placesList.map((p) => ({
+      // Use logical OR to ensure we don't crash on missing fields
+      id: p.place_id || p.id, 
+      name: p.name || "Unknown Place",
+      
+      // Pass these through so the Booking MCP can use them
+      address: p.address,
+      website: p.website,
+      phone: p.phone,
+      
+      // Formatting for the UI card
+      distance: p.distance_km ? `${p.distance_km} km` : (p.distance || "?"),
+      time: p.travel_time ? `${p.travel_time} min` : (p.time || "?"),
+      crowd: p.crowd_level || p.crowd || "Unknown",
+      price: p.price_level || p.price || "₹₹",
+    }));
 
-  
-  if (!response.ok) {
-    throw new Error("Failed to fetch recommendations");
+  } catch (error) {
+    console.error("fetchPlaces failed:", error);
+    return []; // Return empty array so the app doesn't crash
   }
-
-  const data = await response.json();
-  console.log("API response:", data);
-
-  return data.results.map((p) => ({
-    id: p.place_id,
-    name: p.name,
-    distance: p.distance_km ? `${p.distance_km} km` : "?",
-    time: p.travel_time ? `${p.travel_time} min` : "?",
-    crowd: p.crowd_level || "Unknown",
-    price: "₹₹",
-  }));
 }

@@ -12,7 +12,6 @@ if not MAPBOX_TOKEN:
 
 class MapboxMCP:
 
-    GEOCODE_URL = "https://api.mapbox.com/geocoding/v5/mapbox.places"
     DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic"
 
     def search_places(
@@ -25,39 +24,51 @@ class MapboxMCP:
         url = f"https://api.mapbox.com/search/v1/category/{category}"
 
         params = {
-            "proximity": f"{lng},{lat}",   # NOTE lng,lat
+            "proximity": f"{lng},{lat}", 
             "limit": limit,
             "language": "en",
             "access_token": MAPBOX_TOKEN
         }
 
-        res = requests.get(url, params=params, timeout=5)
-        res.raise_for_status()
-        data = res.json()
+        try:
+            res = requests.get(url, params=params, timeout=5)
+            res.raise_for_status()
+            data = res.json()
+            
+            features = data.get("features", [])
+            if not isinstance(features, list):
+                return []
 
-        features = data.get("features")
-        if not isinstance(features, list):
+            places = []
+
+            for f in features:
+                coords = f["geometry"]["coordinates"]
+                props = f.get("properties", {})
+                metadata = props.get("metadata", {})
+
+                # Extract useful booking info
+                places.append({
+                    "place_id": props.get("mapbox_id") or f.get("id"),
+                    "name": props.get("feature_name") or props.get("name"),
+                    "address": props.get("place_name") or props.get("description"),
+                    "latitude": coords[1],
+                    "longitude": coords[0],
+                    "categories": props.get("poi_category") or [],
+                    
+                    # Added these fields for the Booking Button logic
+                    "website": metadata.get("website"), 
+                    "phone": metadata.get("phone"),
+                    
+                    "rating": None,             
+                    "user_ratings_total": None, 
+                    "price_level": None         
+                })
+
+            return places
+
+        except Exception as e:
+            print(f"Error fetching places: {e}")
             return []
-
-        places = []
-
-        for f in data.get("features", []):
-            coords = f["geometry"]["coordinates"]
-            props = f.get("properties", {})
-
-            places.append({
-                "place_id": props.get("mapbox_id") or f.get("id"),
-                "name": props.get("feature_name") or props.get("name"),
-                "address": props.get("place_name") or props.get("description"),
-                "latitude": coords[1],
-                "longitude": coords[0],
-                "categories": props.get("poi_category") or [],
-                "rating": None,              # placeholder (future)
-                "user_ratings_total": None,  # placeholder
-                "price_level": None          # placeholder
-            })
-
-        return places
 
     def get_travel_time(
         self,
@@ -68,9 +79,7 @@ class MapboxMCP:
     ) -> Dict:
         """
         Returns distance (km) and traffic-aware travel time (minutes).
-        Gracefully degrades on network failure.
         """
-
         url = (
             f"{self.DIRECTIONS_URL}/"
             f"{origin_lng},{origin_lat};{dest_lng},{dest_lat}"
@@ -99,7 +108,6 @@ class MapboxMCP:
             }
 
         except (Timeout, RequestException):
-            # ---- SAFE FALLBACK ----
             return {
                 "distance_km": None,
                 "travel_time": None
