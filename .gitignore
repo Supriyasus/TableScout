@@ -1,12 +1,34 @@
-# Node
+# Dependencies
+node_modules/
+venv/
+env/
+.venv
 frontend/node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Production builds
 frontend/build/
+frontend/dist/
 
 # Python
-backend/venv/
-backend/__pycache__/
-.env
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.pytest_cache/
+.coverage
 
-# OS / Editor
-.DS_Store
+# IDEs
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

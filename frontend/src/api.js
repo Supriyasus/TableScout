@@ -1,4 +1,7 @@
-const API_BASE = "http://127.0.0.1:8000/api/v1";
+// Use environment variable for API URL, fallback to localhost for development
+const API_BASE = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}/v1`
+  : "http://127.0.0.1:8000/api/v1";
 
 export async function fetchPlaces(query, latitude, longitude) {
   const token = localStorage.getItem("access_token");
