@@ -13,6 +13,7 @@ app = FastAPI(title="TableScout Backend")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "*",
         "https://table-scout.netlify.app",  # Your deployed frontend
         "http://localhost:3000"             # Optional: for local development
     ],
