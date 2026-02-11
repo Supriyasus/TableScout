@@ -11,6 +11,7 @@ At its core TableScout uses an agent-based backend and focused MCP (Model Connec
 
 This architecture (agents + MCPs) enables fast iteration, clear separation of concerns, and easier testing. The stack (FastAPI backend + React frontend) provides a developer-friendly environment for building and extending location-based experiences.
 
+[Visit TableScout](https://table-scout.netlify.app/)
 ---
 
 ## Key Features
