@@ -20,6 +20,8 @@ git push origin main
 - **Runtime**: Python 3.11
 - **Build Command**: `pip install -r backend/requirements.txt && pip install gunicorn`
 - **Start Command**: `gunicorn -w 4 -k uvicorn.workers.UvicornWorker backend.main:app --bind 0.0.0.0:10000`
+
+
 - **Environment Variables**:
   ```
   DATABASE_URL=<paste your internal URL>
