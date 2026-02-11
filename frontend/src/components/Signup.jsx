@@ -5,12 +5,15 @@ export default function Signup({ onAuthSuccess, switchToLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const API_BASE = process.env.REACT_APP_API_URL 
+  ? `${process.env.REACT_APP_API_URL}/v1`
+  : "http://localhost:8000";
 
   const handleSignup = async () => {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:8000/auth/signup", {
+      const res = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
