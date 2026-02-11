@@ -41,6 +41,7 @@ export default function App() {
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const API_BASE = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/v1` : "http://127.0.0.1:8000/api/v1";
 
   // ✅ Hooks must always run (fixes conditional hook error)
   useEffect(() => {
@@ -133,7 +134,7 @@ export default function App() {
     else window.open(bookingUrl, "_blank");
 
     try {
-      fetch("http://localhost:8000/api/v1/booking", {
+      fetch(`${API_BASE}/booking`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

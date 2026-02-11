@@ -11,6 +11,7 @@ export default function Home({ userId, onLogout }) {
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const API_BASE = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/v1` : "http://127.0.0.1:8000/api/v1";
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -46,7 +47,7 @@ export default function Home({ userId, onLogout }) {
     const token = localStorage.getItem("access_token");
     const time = new Date().toISOString();
 
-    const res = await fetch("http://localhost:8000/api/v1/booking", {
+    const res = await fetch(`${API_BASE}/booking`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

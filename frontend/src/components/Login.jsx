@@ -6,7 +6,7 @@ export default function Login({ onAuthSuccess, switchToSignup }) {
   const [error, setError] = useState("");
   const API_BASE = process.env.REACT_APP_API_URL 
   ? `${process.env.REACT_APP_API_URL}/v1`
-  : "http://localhost:8000";
+  : "http://127.0.0.1:8000/api/v1";
 
   const handleLogin = async () => {
     setError("");
