@@ -41,7 +41,7 @@ export default function App() {
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-  const API_BASE = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/v1` : "http://127.0.0.1:8000/api/v1";
+  const API_BASE = process.env.REACT_APP_API_URL ? `${process.env.REACT_APP_API_URL}/api/v1` : "http://127.0.0.1:8000/api/v1";
 
   // ✅ Hooks must always run (fixes conditional hook error)
   useEffect(() => {
