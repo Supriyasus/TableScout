@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Depends
 from backend.api.router import router as api_router
-from backend.api.v1.auth import router as auth_router
 from backend.db.session import get_db
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
@@ -22,8 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth_router)
 app.include_router(api_router)
 
 @app.get("/health")

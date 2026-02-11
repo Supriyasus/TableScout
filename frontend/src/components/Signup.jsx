@@ -13,7 +13,7 @@ export default function Signup({ onAuthSuccess, switchToLogin }) {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/signup`, {
+      const res = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
